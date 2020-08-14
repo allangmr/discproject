@@ -21,15 +21,18 @@
                                 <li v-for="error in errors" v-bind:key="error">{{ error }}</li>
                                 </ul>
                                 </p>
-                            <textarea class="form-control" type="text" v-model="message" name="confession" placeholder="Escribe tu Confesión..." required=""></textarea>
+                            <textarea class="form-control" type="text" v-model="message" v-on:click="confirmacion = ''"  name="confession" placeholder="Escribe tu Confesión..." v-validate="'required|min:10'"></textarea>
                             <div class="form-button">
                                 <button id="submit" type="submit" class="ibtn">Enviar</button>
                             </div>
                         </form>
-                        <strong>Output:</strong>
-                        <pre>
-                        {{output}}
-                        </pre>
+                        <div class="alert alert-warning alert-dismissible fade show" role="alert" v-show="seen">
+                            <strong>Confirmación de Envio</strong>
+                            <br>
+                            <span v-show="confirmacion">{{confirmacion}}</span>
+                            <br>
+                            <span>{{ errors.first('confession') }}</span>
+                        </div>
                         <div class="other-links">
                             <span>Desarrollado por <b>#DevsTeam</b></span>
                         </div>
@@ -43,38 +46,41 @@
 <script>
     export default {
         mounted() {
-            console.log('Component mounted.')
+            console.log('Component mounted.');
         },
         data() {
             return {
               message: '',
-              errors: [],
-              output: ''
-
+              output: '',
+              seen: false,
+              confirmacion:''
             };
         },
         methods: {
             formSubmit(e) {
-                e.preventDefault();
-                 if (this.message) {
-                    let currentObj = this;
-                    this.axios.post('https://us-central1-infinityprojects-c0bc3.cloudfunctions.net/confessionDiscord', {
-                        message: this.message
-                    })
-                    .then(function (response) {
-                        currentObj.output = response.data;
-                    })
-                    .catch(function (error) {
-                        currentObj.output = error;
-                    });
-                    return true;
-                }
+                    e.preventDefault();
+                    this.seen= true
+                    this.confirmacion = ""
+                    if (this.message && this.message != "") {
+                        let currentObj = this;
+                        this.axios.post('https://us-central1-infinityprojects-c0bc3.cloudfunctions.net/confessionDiscord', {
+                            message: this.message.trim()
+                        })
+                        .then(function (response) {
+                            currentObj.confirmacion = "Tu Confesión ya esta dando de que hablar.";
 
-                this.errors = [];
+                        })
+                        .catch(function (error) {
+                            currentObj.confirmacion = "Se produjo un error, al intentar enviar tu confesión. Intentalo más tarde.";
+                        });
+                        return true;
+                    }
 
-                if (!this.message) {
-                    this.errors.push('El nombre es obligatorio.');
-                }
+                    if (!this.message || this.message == "") {
+
+                        this.confirmacion = "La Confesión no puede ir vacia. Buen Intento Crack!";
+                    }
+
             }
         }
     }
