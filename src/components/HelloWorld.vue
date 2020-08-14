@@ -63,7 +63,7 @@
                     this.confirmacion = ""
                     if (this.message && this.message != "") {
                         let currentObj = this;
-                        this.axios.post('https://us-central1-infinityprojects-c0bc3.cloudfunctions.net/confessionDiscord', {
+                        this.axios.post('https://confessions-bb.herokuapp.com/message', {
                             message: this.message.trim()
                         })
                         .then(function (response) {
